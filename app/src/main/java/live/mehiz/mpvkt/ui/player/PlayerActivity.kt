@@ -60,6 +60,7 @@ import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import java.io.File
+import java.net.URLDecoder
 
 @Suppress("TooManyFunctions", "LargeClass")
 class PlayerActivity : AppCompatActivity() {
@@ -252,7 +253,26 @@ class PlayerActivity : AppCompatActivity() {
       copyMPVFonts()
     }
   }
+  
+ private fun decodeLocalhostUrl(url: String): String {
+    if (!url.startsWith("http://127.0.0.1") && !url.startsWith("http://localhost")) {
+        return url
+    }
 
+    return try {
+        val lastSlash = url.lastIndexOf('/')
+        if (lastSlash > 0) {
+            val base = url.substring(0, lastSlash + 1)
+            val filename = URLDecoder.decode(url.substring(lastSlash + 1), "UTF-8")
+            base + filename
+        } else {
+            url
+        }
+    } catch (e: Exception) {
+        url
+    }
+}
+ 
   private fun setupMPV() {
     copyMPVAssets()
     player.initialize(filesDir.path, cacheDir.path)
@@ -458,19 +478,22 @@ class PlayerActivity : AppCompatActivity() {
   @Suppress("NestedBlockDepth")
   private fun parsePathFromIntent(intent: Intent): String? {
     return when (intent.action) {
-      Intent.ACTION_VIEW -> intent.data?.resolveUri(this)
-      Intent.ACTION_SEND -> {
-        if (intent.hasExtra(Intent.EXTRA_STREAM)) {
-          intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!.resolveUri(this)
-        } else {
-          intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-            val uri = it.trim().toUri()
-            if (uri.isHierarchical && !uri.isRelative) uri.resolveUri(this) else null
-          }
+        Intent.ACTION_VIEW -> intent.data?.resolveUri(this)?.let { decodeLocalhostUrl(it) }
+        Intent.ACTION_SEND -> {
+            if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+                intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.resolveUri(this)?.let { decodeLocalhostUrl(it) }
+            } else {
+                intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+                    val uri = it.trim().toUri()
+                    if (uri.isHierarchical && !uri.isRelative) {
+                        uri.resolveUri(this)?.let { decodeLocalhostUrl(it) }
+                    } else {
+                        null
+                    }
+                }
+            }
         }
-      }
-
-      else -> intent.getStringExtra("uri")
+        else -> intent.getStringExtra("uri")?.let { decodeLocalhostUrl(it) }
     }
   }
 
