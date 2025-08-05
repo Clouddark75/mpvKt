@@ -255,7 +255,6 @@ class PlayerActivity : AppCompatActivity() {
   }
   
  private fun decodeLocalhostUrl(url: String): String {
- private fun decodeLocalhostUrl(url: String): String {
     if (!url.startsWith("http://127.0.0.1") && !url.startsWith("http://localhost")) {
       return url
     }
