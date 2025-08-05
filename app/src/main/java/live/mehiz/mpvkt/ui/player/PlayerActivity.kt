@@ -256,22 +256,22 @@ class PlayerActivity : AppCompatActivity() {
   
  private fun decodeLocalhostUrl(url: String): String {
     if (!url.startsWith("http://127.0.0.1") && !url.startsWith("http://localhost")) {
-        return url
+      return url
     }
 
     return try {
-        val lastSlash = url.lastIndexOf('/')
-        if (lastSlash > 0) {
-            val base = url.substring(0, lastSlash + 1)
-            val filename = URLDecoder.decode(url.substring(lastSlash + 1), "UTF-8")
-            base + filename
-        } else {
-            url
-        }
-    } catch (e: Exception) {
+      val lastSlash = url.lastIndexOf('/')
+      if (lastSlash > 0) {
+        val base = url.substring(0, lastSlash + 1)
+        val filename = URLDecoder.decode(url.substring(lastSlash + 1), "UTF-8")
+        base + filename
+      } else {
         url
+      }
+    } catch (e: Exception) {
+      url
     }
-}
+  }
  
   private fun setupMPV() {
     copyMPVAssets()
