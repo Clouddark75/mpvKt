@@ -253,8 +253,8 @@ class PlayerActivity : AppCompatActivity() {
       copyMPVFonts()
     }
   }
-  
- private fun decodeLocalhostUrl(url: String): String {
+
+  private fun decodeLocalhostUrl(url: String): String {
     if (!url.startsWith("http://127.0.0.1") && !url.startsWith("http://localhost")) {
       return url
     }
@@ -272,7 +272,7 @@ class PlayerActivity : AppCompatActivity() {
       url
     }
   }
- 
+
   private fun setupMPV() {
     copyMPVAssets()
     player.initialize(filesDir.path, cacheDir.path)
@@ -476,27 +476,27 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   @Suppress("NestedBlockDepth")
-private fun parsePathFromIntent(intent: Intent): String? {
+  private fun parsePathFromIntent(intent: Intent): String? {
     return when (intent.action) {
-        Intent.ACTION_VIEW -> intent.data?.resolveUri(this)?.let { decodeLocalhostUrl(it) }
-        Intent.ACTION_SEND -> {
-            if (intent.hasExtra(Intent.EXTRA_STREAM)) {
-                intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.resolveUri(this)?.let { decodeLocalhostUrl(it) }
+      Intent.ACTION_VIEW -> intent.data?.resolveUri(this)?.let { decodeLocalhostUrl(it) }
+      Intent.ACTION_SEND -> {
+        if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+          intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.resolveUri(this)?.let { decodeLocalhostUrl(it) }
+        } else {
+          intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+            val uri = it.trim().toUri()
+            if (uri.isHierarchical && !uri.isRelative) {
+              uri.resolveUri(this)?.let { decodeLocalhostUrl(it) }
             } else {
-                intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-                    val uri = it.trim().toUri()
-                    if (uri.isHierarchical && !uri.isRelative) {
-                        uri.resolveUri(this)?.let { decodeLocalhostUrl(it) }
-                    } else {
-                        null
-                    }
-                }
+              null
             }
+          }
         }
-        else -> intent.getStringExtra("uri")?.let { decodeLocalhostUrl(it) }
+      }
+      else -> intent.getStringExtra("uri")?.let { decodeLocalhostUrl(it) }
     }
-}
-  
+  }
+
   private fun getFileName(intent: Intent): String {
     val uri = if (intent.type == "text/plain") {
       intent.getStringExtra(Intent.EXTRA_TEXT)!!.toUri()
