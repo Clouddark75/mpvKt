@@ -52,10 +52,10 @@ import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.round
 import kotlin.math.roundToInt
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.onFocusChanged
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -234,7 +234,6 @@ fun DelayCard(
 
       var isDirectionPositive by remember { mutableStateOf<Boolean?>(null) }
 
-      // Enhanced button row with proper focus management
       Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
@@ -256,14 +255,17 @@ fun DelayCard(
           }
         }
 
-        // Enhanced buttons with explicit focus handling
         Button(
           onClick = {
-            isDirectionPositive = if (isDirectionPositive == null) delayType == DelayType.Audio else null
+            isDirectionPositive = if (isDirectionPositive == null) {
+              delayType == DelayType.Audio
+            } else {
+              null
+            }
           },
           modifier = Modifier
             .weight(1f)
-            .focusable(), // Ensure focusable
+            .focusable(),
           enabled = isDirectionPositive != (delayType == DelayType.Audio),
         ) {
           Text(
@@ -276,14 +278,18 @@ fun DelayCard(
             ),
           )
         }
-        
+
         Button(
           onClick = {
-            isDirectionPositive = if (isDirectionPositive == null) delayType != DelayType.Audio else null
+            isDirectionPositive = if (isDirectionPositive == null) {
+              delayType != DelayType.Audio
+            } else {
+              null
+            }
           },
           modifier = Modifier
             .weight(1f)
-            .focusable(), // Ensure focusable
+            .focusable(),
           enabled = isDirectionPositive != (delayType == DelayType.Subtitle),
         ) {
           Text(
@@ -298,7 +304,6 @@ fun DelayCard(
         }
       }
 
-      // Enhanced bottom button row
       Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
@@ -306,7 +311,7 @@ fun DelayCard(
           onClick = onApply,
           modifier = Modifier
             .weight(1f)
-            .focusable(), // Ensure focusable
+            .focusable(),
           enabled = isDirectionPositive == null,
         ) {
           Text(stringResource(R.string.player_sheets_delay_set_as_default))
@@ -315,7 +320,7 @@ fun DelayCard(
         FilledIconButton(
           onClick = onReset,
           enabled = isDirectionPositive == null,
-          modifier = Modifier.focusable(), // Ensure focusable
+          modifier = Modifier.focusable(),
         ) {
           Icon(Icons.Default.Refresh, null)
         }
@@ -362,7 +367,6 @@ fun SubtitleDelayTitle(
           }
         }
         .clickable { showDropDownMenu = true }
-        // Add visual focus indication for TV
         .then(
           if (isDropdownFocused) {
             Modifier.background(
@@ -393,7 +397,6 @@ fun SubtitleDelayTitle(
               onTypeChange(delayType)
               showDropDownMenu = false
             },
-            // DropdownMenuItem should handle focus properly by default
           )
         }
       }
@@ -401,7 +404,6 @@ fun SubtitleDelayTitle(
 
     Spacer(Modifier.weight(1f))
 
-    // IconButton should handle focus properly, but let's make sure
     IconButton(
       onClick = onClose,
       modifier = Modifier.focusable()
