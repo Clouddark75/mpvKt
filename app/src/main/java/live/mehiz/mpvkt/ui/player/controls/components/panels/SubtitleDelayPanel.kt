@@ -52,6 +52,15 @@ import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.round
 import kotlin.math.roundToInt
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 
 @Composable
 fun SubtitleDelayPanel(
@@ -180,7 +189,7 @@ enum class SubtitleDelayType(
   Both(R.string.player_sheets_sub_delay_subtitle_type_primary_and_secondary),
 }
 
-@Suppress("LambdaParameterInRestartableEffect") // Intentional
+@Suppress("LambdaParameterInRestartableEffect")
 @Composable
 fun DelayCard(
   delay: Int,
@@ -208,6 +217,7 @@ fun DelayCard(
       verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
     ) {
       title()
+      
       OutlinedNumericChooser(
         label = { Text(stringResource(R.string.player_sheets_sub_delay_card_delay)) },
         value = delay,
@@ -217,16 +227,20 @@ fun DelayCard(
         max = Int.MAX_VALUE,
         suffix = { Text(stringResource(R.string.generic_unit_ms)) },
       )
+      
       Column(
         modifier = Modifier.animateContentSize(),
       ) { extraSettings() }
-      // true (heard -> spotted), false (spotted -> heard)
+      
       var isDirectionPositive by remember { mutableStateOf<Boolean?>(null) }
+      
+      // Enhanced button row with proper focus management
       Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
         var timerStart by remember { mutableStateOf<Long?>(null) }
         var finalDelay by remember { mutableIntStateOf(delay) }
+        
         LaunchedEffect(isDirectionPositive) {
           if (isDirectionPositive == null) {
             onDelayChange(finalDelay)
@@ -238,15 +252,18 @@ fun DelayCard(
           while (isDirectionPositive != null && timerStart != null) {
             val elapsed = System.currentTimeMillis() - timerStart!!
             finalDelay = startingDelay + (if (isDirectionPositive!!) elapsed else -elapsed).toInt()
-            // Arbitrary delay of 20ms
             delay(20)
           }
         }
+        
+        // Enhanced buttons with explicit focus handling
         Button(
           onClick = {
             isDirectionPositive = if (isDirectionPositive == null) delayType == DelayType.Audio else null
           },
-          modifier = Modifier.weight(1f),
+          modifier = Modifier
+            .weight(1f)
+            .focusable(), // Ensure focusable
           enabled = isDirectionPositive != (delayType == DelayType.Audio),
         ) {
           Text(
@@ -259,11 +276,14 @@ fun DelayCard(
             ),
           )
         }
+        
         Button(
           onClick = {
             isDirectionPositive = if (isDirectionPositive == null) delayType != DelayType.Audio else null
           },
-          modifier = Modifier.weight(1f),
+          modifier = Modifier
+            .weight(1f)
+            .focusable(), // Ensure focusable
           enabled = isDirectionPositive != (delayType == DelayType.Subtitle),
         ) {
           Text(
@@ -277,19 +297,25 @@ fun DelayCard(
           )
         }
       }
+      
+      // Enhanced bottom button row
       Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
         Button(
           onClick = onApply,
-          modifier = Modifier.weight(1f),
+          modifier = Modifier
+            .weight(1f)
+            .focusable(), // Ensure focusable
           enabled = isDirectionPositive == null,
         ) {
           Text(stringResource(R.string.player_sheets_delay_set_as_default))
         }
+        
         FilledIconButton(
           onClick = onReset,
           enabled = isDirectionPositive == null,
+          modifier = Modifier.focusable(), // Ensure focusable
         ) {
           Icon(Icons.Default.Refresh, null)
         }
@@ -314,31 +340,67 @@ fun SubtitleDelayTitle(
       stringResource(R.string.player_sheets_sub_delay_card_title),
       style = MaterialTheme.typography.headlineMedium,
     )
+    
     var showDropDownMenu by remember { mutableStateOf(false) }
-    Row(modifier = Modifier.clickable { showDropDownMenu = true }) {
+    var isDropdownFocused by remember { mutableStateOf(false) }
+    
+    // Fixed dropdown with proper TV remote support
+    Row(
+      modifier = Modifier
+        .focusable()
+        .onFocusChanged { focusState -> 
+          isDropdownFocused = focusState.isFocused 
+        }
+        .onKeyEvent { keyEvent ->
+          if ((keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter) && 
+              keyEvent.type == KeyEventType.KeyUp) {
+            showDropDownMenu = true
+            true
+          } else false
+        }
+        .clickable { showDropDownMenu = true }
+        // Add visual focus indication for TV
+        .then(
+          if (isDropdownFocused) {
+            Modifier.background(
+              MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+              RoundedCornerShape(4.dp)
+            )
+          } else Modifier
+        )
+        .padding(horizontal = 4.dp, vertical = 2.dp)
+    ) {
       Text(
         stringResource(affectedSubtitle.title),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium,
       )
       Icon(Icons.Default.ArrowDropDown, null)
+      
       DropdownMenu(
         expanded = showDropDownMenu,
         onDismissRequest = { showDropDownMenu = false },
       ) {
-        SubtitleDelayType.entries.forEach {
+        SubtitleDelayType.entries.forEach { delayType ->
           DropdownMenuItem(
-            text = { Text(stringResource(it.title)) },
+            text = { Text(stringResource(delayType.title)) },
             onClick = {
-              onTypeChange(it)
+              onTypeChange(delayType)
               showDropDownMenu = false
             },
+            // DropdownMenuItem should handle focus properly by default
           )
         }
       }
     }
+    
     Spacer(Modifier.weight(1f))
-    IconButton(onClose) {
+    
+    // IconButton should handle focus properly, but let's make sure
+    IconButton(
+      onClick = onClose,
+      modifier = Modifier.focusable()
+    ) {
       Icon(
         Icons.Default.Close,
         null,
