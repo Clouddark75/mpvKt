@@ -217,7 +217,7 @@ fun DelayCard(
       verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
     ) {
       title()
-      
+
       OutlinedNumericChooser(
         label = { Text(stringResource(R.string.player_sheets_sub_delay_card_delay)) },
         value = delay,
@@ -227,20 +227,20 @@ fun DelayCard(
         max = Int.MAX_VALUE,
         suffix = { Text(stringResource(R.string.generic_unit_ms)) },
       )
-      
+
       Column(
         modifier = Modifier.animateContentSize(),
       ) { extraSettings() }
-      
+
       var isDirectionPositive by remember { mutableStateOf<Boolean?>(null) }
-      
+
       // Enhanced button row with proper focus management
       Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
         var timerStart by remember { mutableStateOf<Long?>(null) }
         var finalDelay by remember { mutableIntStateOf(delay) }
-        
+
         LaunchedEffect(isDirectionPositive) {
           if (isDirectionPositive == null) {
             onDelayChange(finalDelay)
@@ -255,7 +255,7 @@ fun DelayCard(
             delay(20)
           }
         }
-        
+
         // Enhanced buttons with explicit focus handling
         Button(
           onClick = {
@@ -297,7 +297,7 @@ fun DelayCard(
           )
         }
       }
-      
+
       // Enhanced bottom button row
       Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
@@ -311,7 +311,7 @@ fun DelayCard(
         ) {
           Text(stringResource(R.string.player_sheets_delay_set_as_default))
         }
-        
+
         FilledIconButton(
           onClick = onReset,
           enabled = isDirectionPositive == null,
@@ -340,23 +340,26 @@ fun SubtitleDelayTitle(
       stringResource(R.string.player_sheets_sub_delay_card_title),
       style = MaterialTheme.typography.headlineMedium,
     )
-    
+
     var showDropDownMenu by remember { mutableStateOf(false) }
     var isDropdownFocused by remember { mutableStateOf(false) }
-    
+
     // Fixed dropdown with proper TV remote support
     Row(
       modifier = Modifier
         .focusable()
-        .onFocusChanged { focusState -> 
-          isDropdownFocused = focusState.isFocused 
+        .onFocusChanged { focusState ->
+          isDropdownFocused = focusState.isFocused
         }
         .onKeyEvent { keyEvent ->
-          if ((keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter) && 
-              keyEvent.type == KeyEventType.KeyUp) {
+          if ((keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter) &&
+            keyEvent.type == KeyEventType.KeyUp
+          ) {
             showDropDownMenu = true
             true
-          } else false
+          } else {
+            false
+          }
         }
         .clickable { showDropDownMenu = true }
         // Add visual focus indication for TV
@@ -366,7 +369,9 @@ fun SubtitleDelayTitle(
               MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
               RoundedCornerShape(4.dp)
             )
-          } else Modifier
+          } else {
+            Modifier
+          }
         )
         .padding(horizontal = 4.dp, vertical = 2.dp)
     ) {
@@ -376,7 +381,7 @@ fun SubtitleDelayTitle(
         style = MaterialTheme.typography.bodyMedium,
       )
       Icon(Icons.Default.ArrowDropDown, null)
-      
+
       DropdownMenu(
         expanded = showDropDownMenu,
         onDismissRequest = { showDropDownMenu = false },
@@ -393,9 +398,9 @@ fun SubtitleDelayTitle(
         }
       }
     }
-    
+
     Spacer(Modifier.weight(1f))
-    
+
     // IconButton should handle focus properly, but let's make sure
     IconButton(
       onClick = onClose,
