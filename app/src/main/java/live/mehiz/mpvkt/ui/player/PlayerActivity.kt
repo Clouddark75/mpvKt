@@ -260,18 +260,25 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     return try {
-      val lastSlash = url.lastIndexOf('/')
-      if (lastSlash > 0) {
-        val base = url.substring(0, lastSlash + 1)
-        val filename = URLDecoder.decode(url.substring(lastSlash + 1), "UTF-8")
-        base + filename
-      } else {
-        url
-      }
+        val lastSlash = url.lastIndexOf('/')
+        if (lastSlash == -1 || lastSlash == url.length - 1) {
+            url
+        } else {
+            val pathPart = url.substring(0, lastSlash + 1)
+            val filename = url.substring(lastSlash + 1)
+            val decodedFilename = URLDecoder.decode(filename, "UTF-8")
+            
+            val safeFilename = decodedFilename
+                .replace("#", "%23")
+                .replace("?", "%3F")
+                .replace("&", "%26")
+            
+            pathPart + safeFilename
+        }
     } catch (e: Exception) {
       url
     }
-  }
+}
 
   private fun setupMPV() {
     copyMPVAssets()
