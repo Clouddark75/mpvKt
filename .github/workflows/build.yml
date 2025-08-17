@@ -58,3 +58,4 @@ jobs:
         with:
           name: app-x86_64-release-unsigned-${{ env.SHORT_SHA }}
           path: app/build/outputs/apk/release/app-x86_64-release-unsigned.apk
+          
