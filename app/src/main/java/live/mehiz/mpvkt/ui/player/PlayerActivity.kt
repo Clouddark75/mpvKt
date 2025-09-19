@@ -249,7 +249,6 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-
   private fun copyMPVAssets() {
     Utils.copyAssets(this@PlayerActivity)
     copyMPVScripts()
