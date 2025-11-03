@@ -100,13 +100,17 @@ android {
   }
 }
 
+kotlin {
+  compilerOptions {
+    freeCompilerArgs.addAll("-Xwhen-guards", "-Xcontext-parameters")
+  }
+}
+
 room {
   schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
-  implementation(libs.androidx.core.ktx)
-  implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
